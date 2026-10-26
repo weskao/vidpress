@@ -1,0 +1,33 @@
+[project]
+name = "vidpress"
+version = "0.1.0"
+description = "Colorful safe parallel FFmpeg compression CLI for macOS"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{name = "Wes Kao"}]
+dependencies = ["rich>=13.9,<15"]
+keywords = ["ffmpeg", "video", "compression", "cli", "av1", "hevc"]
+
+[project.scripts]
+vidpress = "vidpress.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vidpress"]
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.9"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B023", "B904"]

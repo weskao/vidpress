@@ -1,0 +1,59 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100/
+.Trashes/
+.fseventsd/
+.TemporaryItems/
+
+# Python / uv
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+.tox/
+.nox/
+*.whl
+
+# Editors / env / secrets
+.idea/
+.vscode/
+*.swp
+*.swo
+.env
+.env.*
+!.env.example
+*.local
+
+# User videos and generated media (keep tests/fixtures tracked)
+compressed/
+output/
+outputs/
+reports/
+*.partial.mp4
+*.partial.mkv
+*.tmp
+*.log
+*.csv
+# Protect accidental large video commits, fixtures below stay trackable
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.webm
+*.m4v
+*.mpg
+*.mpeg
+*.ts
+!tests/fixtures/**

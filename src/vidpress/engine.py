@@ -7,8 +7,8 @@ import json
 import os
 import re
 import shutil
-import sys
 import subprocess
+import sys
 import tempfile
 from collections.abc import Callable
 from dataclasses import dataclass

@@ -1,35 +1,114 @@
 name: CI
+
 on:
   push:
-    branches: ['**']
   pull_request:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUTF8: "1"
+
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    name: Python 3.10 / ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          python-version: "3.10"
           enable-cache: true
-      - name: Install FFmpeg on macOS
+      - name: FFmpeg (macOS)
         if: runner.os == 'macOS'
         run: brew install ffmpeg
-      - name: Install FFmpeg on Ubuntu
+      - name: FFmpeg (Ubuntu)
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
-      - name: Install environment
-        run: uv sync --group dev
-      - name: Ruff
+      - name: FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+            choco install ffmpeg -y --no-progress
+          }
+      - name: Verify FFmpeg
+        run: ffmpeg -version
+      - name: Install dependencies
+        run: uv sync --all-groups
+      - name: Lint
         run: uv run ruff check .
-      - name: Unit and integration tests
+      - name: Unit and FFmpeg integration tests
         run: uv run pytest -q
-      - name: CLI smoke
-        run: uv run vidpress --help
+      - name: Build distributions
+        run: uv build
+      - name: Validate installed wheel and CLI
+        shell: python
+        run: |
+          import os
+          from pathlib import Path
+          import subprocess
+          import tempfile
+
+          wheel, = Path("dist").glob("*.whl")
+          with tempfile.TemporaryDirectory() as directory:
+              environment = Path(directory)
+              subprocess.run(["uv", "venv", str(environment)], check=True)
+              scripts = environment / ("Scripts" if os.name == "nt" else "bin")
+              python = scripts / ("python.exe" if os.name == "nt" else "python")
+              subprocess.run(["uv", "pip", "install", "--python", str(python), str(wheel)], check=True)
+              cli = scripts / ("vidpress.exe" if os.name == "nt" else "vidpress")
+              subprocess.run([str(cli), "--help"], check=True)
+              subprocess.run([str(cli), "presets"], check=True)
+
+  # Failure-only pager. A green run sends nothing on purpose: a notification
+  # that arrives on every push is one nobody reads. Credentials live in repo
+  # secrets, never in this file — see README "CI notifications" for the two
+  # `gh secret set` commands that configure them.
+  notify-telegram:
+    needs: test
+    if: ${{ failure() && github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Notify Telegram
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          # Unconfigured secrets are a valid state (a fork, or a clone whose
+          # owner never set them up). Skip quietly instead of failing the job
+          # and reporting a second, misleading red X on top of the real one.
+          if [ -z "$TOKEN" ] || [ -z "$CHAT_ID" ]; then
+            echo "::notice::TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set — skipping notification"
+            exit 0
+          fi
+          # parse_mode=HTML: a branch or commit subject containing < & > would
+          # otherwise produce unparseable markup and Telegram would 400.
+          esc() { printf '%s' "$1" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g'; }
+          ci_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          message="🚨 <b>vidpress CI failed</b>
+
+          <b>Repository:</b> <code>$(esc "$GITHUB_REPOSITORY")</code>
+          <b>Branch:</b> <code>$(esc "$GITHUB_REF_NAME")</code>
+          <b>Commit:</b> <code>$(esc "${GITHUB_SHA::7}")</code>
+
+          <a href=\"$ci_url\">Open failed CI run</a>"
+          curl --fail --silent --show-error --max-time 30 \
+            --data-urlencode "chat_id=$CHAT_ID" \
+            --data-urlencode "parse_mode=HTML" \
+            --data-urlencode "disable_web_page_preview=true" \
+            --data-urlencode "text=$message" \
+            "https://api.telegram.org/bot$TOKEN/sendMessage"

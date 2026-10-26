@@ -4,6 +4,8 @@
 
 **目標：用一個指令批次縮小影片容量，也可以打開彩色互動選單調整畫質、速度、解析度、HDR、平行數與壓縮報告。** 保留原始影片，不會偷偷覆寫或刪除。
 
+![批次壓縮示範：4 支範例影片平行轉成 H.265](docs/images/demo.gif)
+
 ## 1. 安裝（macOS）
 
 首次安裝 Homebrew 後，在 Terminal 輸入：
@@ -32,6 +34,10 @@ vidpress doctor --install
 - 只有啟用 VMAF 時才需要 `ab-av1`（及 FFmpeg 的 `libvmaf`）。工具不會擅自使用 sudo 或下載不明的安裝腳本。
 
 ## 2. 最快的使用方式
+
+![vidpress compress 的壓縮計畫、進度條與結果](docs/images/compress.jpeg)
+
+![vidpress inspect 顯示影片解析度、秒數與 HDR](docs/images/inspect.jpeg)
 
 ```bash
 # 單一影片：預設 H.265、平衡畫質
@@ -72,6 +78,8 @@ vidpress interactive
 
 「Customize advanced options?」選 **Yes** 可以額外調整是否遞迴、最大輸出高度、同時處理幾部影片、音訊與字幕、HDR、目標容量、VMAF（支援 H.264、H.265、AV1）、CRF。開始前會顯示整理好的批次計畫，再逐部顯示彩色進度條、時間與結果摘要。採用 Rich 繪製，不需要網頁伺服器。支援 `NO_COLOR=1`（停用顏色）。
 
+![互動介面：選單、進階選項與壓縮計畫](docs/images/interactive.jpeg)
+
 ## 4. 畫質／容量預設
 
 | 模式 | H.264 CRF | H.265 CRF | AV1 CRF | 適合需求 |
@@ -82,6 +90,8 @@ vidpress interactive
 | `tiny` | 32 | 34 | 45 | 激進壓縮、須檢查失真 |
 
 **CRF 越高通常容量越小、畫質越低**，但不同編碼器的 CRF 不能直接互相比較。`preset slow` 等越慢通常可提高壓縮效率，但實際差異依影片而異。
+
+![vidpress presets 列出各編碼器 CRF](docs/images/presets.jpeg)
 
 例如：
 

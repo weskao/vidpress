@@ -9,6 +9,8 @@
 
 > **Status:** Working CLI, initial test suite and GitHub Actions workflow. CI is only verified once the code is pushed and actions complete. The initial repository was prepared locally; the private GitHub remote must be created by its owner.
 
+![Batch demo: four sample clips compressed to H.265 in parallel](docs/images/demo.gif)
+
 ## Quick start (macOS)
 
 ```bash
@@ -30,6 +32,10 @@ vidpress --help
 > **Installation safety:** During compression, missing FFmpeg is detected. On macOS with Homebrew, interactive users will be asked for permission to install it. Non-interactive automation must use `--install-missing` to opt in to package installation. When automatic VMAF is requested, `ab-av1` is checked similarly; the FFmpeg build must provide `libvmaf`. Nothing runs with `sudo` behind the scenes.
 
 ## Main CLI commands
+
+![vidpress compress: plan, per-file progress bars and results](docs/images/compress.jpeg)
+
+![vidpress inspect: resolution, duration and HDR of a video](docs/images/inspect.jpeg)
 
 ```bash
 # Default: HEVC/x265 at balanced CRF 27
@@ -67,6 +73,8 @@ vidpress inspect ~/Movies/video.mov
 | `tiny` | 32 | 34 | 45 | Aggressive compression; inspect quality |
 
 CRF is **not comparable across codecs**. Lower CRF normally means higher quality/larger file. These are starting points, not objective quality guarantees. Audio defaults to re-encoded AAC 128 kbps; no subtitles by default. Original resolution and frame rate are maintained unless set explicitly.
+
+![vidpress presets: CRF per codec and profile](docs/images/presets.jpeg)
 
 ### Advanced commands
 
@@ -120,6 +128,8 @@ The tool executes `ab-av1 crf-search` and parses its structured newline-delimite
 ## Interactive experience
 
 Run `vidpress` or `vidpress interactive` in an interactive terminal. The Rich UI presents a rounded-panel title, colorful menu, prompts for input/output, codec and quality, an advanced-settings wizard, confirmation before encoding, progress bars per video, time elapsed, per-file results and savings. `NO_COLOR=1` is respected by Rich and a small terminal window still works without clipped, fixed-width art. In a non-interactive shell, always invoke `vidpress compress ...`.
+
+![Interactive mode: menu, advanced options and compression plan](docs/images/interactive.jpeg)
 
 ## All compress options
 

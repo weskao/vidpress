@@ -235,29 +235,27 @@ make check
 
 > 目前建立環境無法連接 PyPI，因此無法在當前執行環境完成 `uv lock`；第一次在可連網的 Mac 執行 `uv sync` 會建立 `uv.lock`。建議提交該鎖定檔，並在 CI 將 `uv sync` 改為 `uv sync --locked`。此外，本機 Linux 測試不等於實機 macOS／GitHub CI 驗證。
 
-## 10. 建立私人 GitHub repository
+## 10. CI 與 Telegram 失敗通知
 
-本專案是可直接 `git push` 的原始碼，以下會在**你自己已登入 GitHub CLI** 的 Mac 上建立私有 repository：
+本專案參考 [aicp CI](https://github.com/weskao/aicp/blob/main/.github/workflows/ci.yml)，使用 Python 3.10 在 macOS、Windows、Ubuntu 執行 Ruff、Pytest、FFmpeg 整合測試、封裝檢查及安裝後 CLI 驗證。**只有 push 的 CI 失敗才會傳送 Telegram 通知**；CI 成功及 Pull Request 不發送，避免通知過多。
+
+請在 macOS Terminal 執行以下指令設定兩個 GitHub Actions Secrets（先登入 `gh auth login`）：
 
 ```bash
 brew install gh
-# gh auth login     # 若第一次使用 gh
-cd vidpress
-git init -b main
-git add .
-git commit -m "feat: initialize vidpress CLI"
-gh repo create weskao/vidpress --private --source . --remote origin --push
+printf 'Telegram Bot Token: '; read -rs TELEGRAM_BOT_TOKEN; echo
+gh secret set TELEGRAM_BOT_TOKEN -R weskao/vidpress --body "$TELEGRAM_BOT_TOKEN"
+unset TELEGRAM_BOT_TOKEN
+printf 'Telegram Chat ID: '; read -r TELEGRAM_CHAT_ID
+gh secret set TELEGRAM_CHAT_ID -R weskao/vidpress --body "$TELEGRAM_CHAT_ID"
+unset TELEGRAM_CHAT_ID
 ```
 
-**在執行並確認成功以前，`https://github.com/weskao/vidpress` 還不是已驗證有效的 GitHub 連結。**
+先傳送 `/start` 給自己的 Telegram Bot，使用 Bot API `getUpdates` 查看 Chat ID。不要將 Token 存入程式碼或 Git。未設定 Secrets 時會安全略過通知，且不會掩蓋真正的測試失敗。
 
-正式建立後可以用：
+## GitHub 專案
 
-```bash
-# 私有 repo 需要已登入的 Git 憑證
-uv tool install git+https://github.com/weskao/vidpress.git
-vidpress
-```
+[weskao/vidpress](https://github.com/weskao/vidpress) — 可使用 `uv tool install git+https://github.com/weskao/vidpress.git` 安裝；Private repo 需要 Git 憑證。
 
 ## 11. 注意事項
 

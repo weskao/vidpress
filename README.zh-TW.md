@@ -1,10 +1,34 @@
-# 🎬 vidpress — macOS 免費影片批次壓縮 CLI
+# 🎬 vidpress — macOS / Windows 免費影片批次壓縮 CLI
 
-[English README](README.md) ｜ Python + uv + FFmpeg / FFprobe + Rich + 選用 ab-av1
+[English](README.md) · **繁體中文**
+
+Python + uv + FFmpeg / FFprobe + Rich + 選用 ab-av1
 
 **目標：用一個指令批次縮小影片容量，也可以打開彩色互動選單調整畫質、速度、解析度、HDR、平行數與壓縮報告。** 保留原始影片，不會偷偷覆寫或刪除。
 
 ![批次壓縮示範：4 支範例影片平行轉成 H.265](docs/images/demo.gif)
+
+## 支援作業系統
+
+| 作業系統 | 支援狀態 | 安裝方式 | 注意事項 |
+|---|---|---|---|
+| macOS（Intel / Apple Silicon） | 支援 | Homebrew + uv | Apple VideoToolbox 硬體壓縮需相容 Mac |
+| Windows 10 / 11 | 支援 | PowerShell + winget + uv | H.264 / H.265 / AV1；無法使用 Apple VideoToolbox |
+| Ubuntu Linux | CI 測試 | FFmpeg + uv | 其他 Linux 發行版取決於 FFmpeg 編碼器 |
+
+### Windows 安裝（PowerShell）
+
+```powershell
+winget install --id astral-sh.uv -e
+winget install --id Gyan.FFmpeg -e
+# 安裝後重新開啟 PowerShell
+cd path\to\vidpress
+uv tool install --force .
+vidpress doctor
+vidpress
+```
+
+Windows 不需要 WSL 或 GNU Make。缺少 FFmpeg 時，macOS 使用 Homebrew，Windows 使用 winget；若不支援硬連結，會改以安全且不覆寫既有影片的方式儲存結果。可用編碼器仍取決於安裝的 FFmpeg 版本。
 
 ## 1. 安裝（macOS）
 
@@ -207,7 +231,7 @@ uv run vidpress --help
 make check
 ```
 
-專案包含測試、`.gitignore`（macOS `.DS_Store`、暫存檔、Python 快取、影片輸出、大型媒體、IDE 等）、MIT License，以及 `.github/workflows/ci.yml`；CI 預定於 macOS、Ubuntu 上執行 Ruff、Pytest 與 CLI smoke test。
+專案包含測試、`.gitignore`（macOS `.DS_Store`、暫存檔、Python 快取、影片輸出、大型媒體、IDE 等）、MIT License，以及 `.github/workflows/ci.yml`；CI 在 macOS、Windows、Ubuntu 上執行 Ruff、Pytest、FFmpeg 整合測試、打包與 CLI smoke test。
 
 > 目前建立環境無法連接 PyPI，因此無法在當前執行環境完成 `uv lock`；第一次在可連網的 Mac 執行 `uv sync` 會建立 `uv.lock`。建議提交該鎖定檔，並在 CI 將 `uv sync` 改為 `uv sync --locked`。此外，本機 Linux 測試不等於實機 macOS／GitHub CI 驗證。
 

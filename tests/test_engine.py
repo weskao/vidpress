@@ -5,8 +5,15 @@ from types import SimpleNamespace
 import pytest
 
 from vidpress.engine import (
-    Options, choose_jobs, collect_inputs, encoder_command, parse_vmaf_result,
-    plan_destination, probe_file, validate_options, video_bitrate,
+    Options,
+    choose_jobs,
+    collect_inputs,
+    encoder_command,
+    parse_vmaf_result,
+    plan_destination,
+    probe_file,
+    validate_options,
+    video_bitrate,
 )
 
 

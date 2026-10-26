@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: help install dev sync run doctor test lint check build publish-private
+.PHONY: help install dev sync run doctor test lint check build
 
 help:
 	@printf '%s\n' 'vidpress commands:' \
@@ -11,7 +11,7 @@ help:
 	  '  make test        run pytest' \
 	  '  make lint        ruff check' \
 	  '  make check       lint + tests' \
-	  '  make build       build wheel via uv' \
+	  '  make build       build wheel via uv'
 
 install:
 	uv tool install --force .

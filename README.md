@@ -202,7 +202,7 @@ git commit -m "feat: initialize vidpress CLI"
 gh repo create weskao/vidpress --private --source . --remote origin --push
 ```
 
-Alternatively after your first commit run `make publish-private`. Do not share the private repo's clone link publicly with people who lack permission. Once the private repo exists, installation via `uv tool install git+https://github.com/weskao/vidpress.git` requires your git credentials to access it. **The remote URL is not live until created and verified.**
+Do not share the private repo's clone link publicly with people who lack permission. Once the private repo exists, installation via `uv tool install git+https://github.com/weskao/vidpress.git` requires your git credentials to access it. **The remote URL is not live until created and verified.**
 
 ### Security
 

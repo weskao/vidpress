@@ -18,8 +18,16 @@ from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
 from .engine import (
-    CODECS, PRESETS, Options, choose_jobs, collect_inputs, encode_one,
-    plan_destination, probe_file, validate_options, write_report,
+    CODECS,
+    PRESETS,
+    Options,
+    choose_jobs,
+    collect_inputs,
+    encode_one,
+    plan_destination,
+    probe_file,
+    validate_options,
+    write_report,
 )
 
 console = Console()

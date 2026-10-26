@@ -225,7 +225,7 @@ git commit -m "feat: initialize vidpress CLI"
 gh repo create weskao/vidpress --private --source . --remote origin --push
 ```
 
-若先建立本機 commit，也可以執行 `make publish-private`。**在執行並確認成功以前，`https://github.com/weskao/vidpress` 還不是已驗證有效的 GitHub 連結。**
+**在執行並確認成功以前，`https://github.com/weskao/vidpress` 還不是已驗證有效的 GitHub 連結。**
 
 正式建立後可以用：
 

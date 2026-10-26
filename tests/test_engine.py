@@ -62,7 +62,9 @@ def test_target_size_and_scale():
     assert '-crf' not in cmd
 
 
-def test_reject_invalid_combinations():
+def test_reject_invalid_combinations(monkeypatch):
+    import vidpress.engine as e
+    monkeypatch.setattr(e.sys, 'platform', 'darwin')
     with pytest.raises(ValueError, match='software'):
         validate_options(Options(codec='hevc-vt', auto_vmaf=95))
     with pytest.raises(ValueError, match='10-bit'):
@@ -97,7 +99,9 @@ def test_hdr_sdr_emits_tone_mapping_and_bt709():
     assert cmd[cmd.index('-color_trc')+1] == 'bt709'
 
 
-def test_videotoolbox_hdr_requests_10_bit(tmp_path):
+def test_videotoolbox_hdr_requests_10_bit(tmp_path, monkeypatch):
+    import vidpress.engine as e
+    monkeypatch.setattr(e.sys, 'platform', 'darwin')
     source = tmp_path / "a.mov"
     source.write_bytes(b"0" * 2048)
     media = {'duration':12, 'height':2160, 'width':3840, 'hdr': True,

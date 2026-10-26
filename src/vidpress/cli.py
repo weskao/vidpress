@@ -56,26 +56,46 @@ def make_parser() -> argparse.ArgumentParser:
     parser.add_argument('-r', '--recursive', action='store_true')
     parser.add_argument('--dry-run', action='store_true')
     parser.add_argument('--skip-if-larger', action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument('--install-missing', action='store_true', help='Allow Homebrew dependency setup')
+    parser.add_argument('--install-missing', action='store_true', help='Allow Homebrew/winget dependency setup')
     parser.add_argument('--report', type=Path, help='Write .json or .csv compression report')
     parser.add_argument('-y', '--yes', action='store_true', help='Run without confirmation')
     sub.add_parser('interactive', help='Colorful guided setup')
     doctor = sub.add_parser('doctor', help='Inspect FFmpeg/encoders and optional VMAF tool')
-    doctor.add_argument('--install', action='store_true', help='Install missing prerequisites using Homebrew (with confirmation)')
+    doctor.add_argument('--install', action='store_true', help='Install missing prerequisites using Homebrew/winget (with confirmation)')
     inspect = sub.add_parser('inspect', help='Inspect video metadata')
     inspect.add_argument('inputs', nargs='+', type=Path)
     sub.add_parser('presets', help='Show quality presets')
     return p
 
 
-def _brew_install(package: str, auto: bool) -> bool:
-    if platform.system() != 'Darwin' or not shutil.which('brew'):
-        console.print('[red]Automatic install needs macOS and Homebrew.[/red]')
+def _install_package(package: str, auto: bool) -> bool:
+    system = platform.system()
+    if system == 'Darwin':
+        manager = 'brew'
+        command = ['brew', 'install', package]
+    elif system == 'Windows':
+        if package == 'ffmpeg':
+            manager = 'winget'
+            command = ['winget', 'install', '--id', 'Gyan.FFmpeg', '-e',
+                       '--accept-source-agreements', '--accept-package-agreements']
+        elif package == 'ab-av1':
+            manager = 'cargo'
+            command = ['cargo', 'install', 'ab-av1']
+        else:
+            return False
+    else:
+        console.print('[yellow]Install FFmpeg with your OS package manager and run doctor again.[/yellow]')
         return False
-    if not auto and (not sys.stdin.isatty() or not Confirm.ask(f'Install {package} via brew?', default=False)):
+    if not shutil.which(manager):
+        console.print(f'[yellow]{manager} is required to install {package} on {system}.[/yellow]')
         return False
-    console.print(f'[cyan]Installing {package} using Homebrew...[/cyan]')
-    return subprocess.run(['brew', 'install', package], check=False).returncode == 0
+    if not auto and (not sys.stdin.isatty() or not Confirm.ask(f'Install {package} via {manager}?', default=False)):
+        return False
+    console.print(f'[cyan]Installing {package} using {manager}...[/cyan]')
+    done = subprocess.run(command, check=False).returncode == 0
+    if done and system == 'Windows':
+        console.print('[yellow]If FFmpeg is not found yet, restart your Terminal to refresh PATH.[/yellow]')
+    return done
 
 
 def ensure_deps(codec: str = 'h265', vmaf: bool = False, install: bool = False) -> bool:
@@ -85,9 +105,9 @@ def ensure_deps(codec: str = 'h265', vmaf: bool = False, install: bool = False) 
     missing = [name for name in required if not shutil.which(name)]
     if missing:
         console.print('[yellow]Missing: ' + ', '.join(missing) + '[/yellow]')
-        if ('ffmpeg' in missing or 'ffprobe' in missing) and _brew_install('ffmpeg', install):
+        if ('ffmpeg' in missing or 'ffprobe' in missing) and _install_package('ffmpeg', install):
             missing = [v for v in missing if v not in ('ffmpeg', 'ffprobe')]
-        if 'ab-av1' in missing and _brew_install('ab-av1', install):
+        if 'ab-av1' in missing and _install_package('ab-av1', install):
             missing.remove('ab-av1')
         # Check PATH again rather than assuming installations worked.
         missing = [name for name in required if not shutil.which(name)]

@@ -6,6 +6,8 @@ import csv
 import json
 import os
 import re
+import shutil
+import sys
 import subprocess
 import tempfile
 from collections.abc import Callable
@@ -82,6 +84,8 @@ def plan_destination(source: Path, output: Path, root: Path, container: str) -> 
 
 
 def validate_options(options: Options, media: dict | None = None) -> None:
+    if options.codec == 'hevc-vt' and sys.platform != 'darwin':
+        raise ValueError('VideoToolbox hardware encoding is only available on macOS')
     if options.codec not in CODECS or options.quality not in PRESETS:
         raise ValueError('Unknown codec or quality')
     if options.crf is not None and not (0 <= options.crf <= (63 if options.codec == 'av1' else 51)):
@@ -300,9 +304,25 @@ def encode_one(source: Path, destination: Path, options: Options, threads: int,
             # Reserve destination exclusively: never overwrite an output created by another job.
             try:
                 os.link(temp, destination)
-                row['status'] = 'ok'
             except FileExistsError:
                 row['status'] = 'exists-skipped'
+            except OSError:
+                # Some Windows volumes/network drives do not permit hard links.
+                # Exclusive creation protects a concurrently produced destination.
+                try:
+                    with destination.open('xb') as target:
+                        try:
+                            with temp.open('rb') as original:
+                                shutil.copyfileobj(original, target, 1024 * 1024)
+                        except BaseException:
+                            destination.unlink(missing_ok=True)
+                            raise
+                except FileExistsError:
+                    row['status'] = 'exists-skipped'
+                else:
+                    row['status'] = 'ok'
+            else:
+                row['status'] = 'ok'
         return row
     except Exception as exc:
         row['error'] = str(exc)

@@ -57,3 +57,14 @@ reports/
 *.mpeg
 *.ts
 !tests/fixtures/**
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.stackdump
+.vs/
+*.suo
+*.user

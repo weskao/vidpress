@@ -12,7 +12,6 @@ help:
 	  '  make lint        ruff check' \
 	  '  make check       lint + tests' \
 	  '  make build       build wheel via uv' \
-	  '  make publish-private  create/push private repo using gh auth'
 
 install:
 	uv tool install --force .
@@ -39,11 +38,3 @@ check: lint test
 
 build:
 	uv build
-
-publish-private:
-	@command -v gh >/dev/null || { echo 'Install GitHub CLI: brew install gh'; exit 1; }
-	@gh auth status
-	@test -d .git || git init -b main
-	@git add .
-	@git diff --cached --quiet || git commit -m 'feat: initialize vidpress CLI'
-	@gh repo create weskao/vidpress --private --source . --remote origin --push

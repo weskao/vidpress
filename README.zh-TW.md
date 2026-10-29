@@ -43,7 +43,7 @@ vidpress                  # 開啟彩色互動介面
 
 找不到 `vidpress` 指令時執行 `uv tool update-shell`，再重開 Terminal。開發環境直接用 `uv run vidpress` 也可以。
 
-可比照 `polytool` / `monitask-center`：在 `pyproject.toml` 透過 `[project.scripts]` 定義 `vidpress = "vidpress.cli:main"`，使用 `uv tool` 安裝。內建 `Makefile`：`make install`、`make dev`、`make run`、`make test`、`make lint`、`make check`。
+在 `pyproject.toml` 透過 `[project.scripts]` 定義 `vidpress = "vidpress.cli:main"`，使用 `uv tool` 安裝。內建 `Makefile`：`make install`、`make dev`、`make run`、`make test`、`make lint`、`make check`。
 
 ### 環境自動檢查／安裝
 
@@ -237,7 +237,7 @@ make check
 
 ## 10. CI 與 Telegram 失敗通知
 
-本專案參考 [aicp CI](https://github.com/weskao/aicp/blob/main/.github/workflows/ci.yml)，使用 Python 3.10 在 macOS、Windows、Ubuntu 執行 Ruff、Pytest、FFmpeg 整合測試、封裝檢查及安裝後 CLI 驗證。**只有 push 的 CI 失敗才會傳送 Telegram 通知**；CI 成功及 Pull Request 不發送，避免通知過多。
+本專案 CI 使用 Python 3.10 在 macOS、Windows、Ubuntu 執行 Ruff、Pytest、FFmpeg 整合測試、封裝檢查及安裝後 CLI 驗證。**只有 push 的 CI 失敗才會傳送 Telegram 通知**；CI 成功及 Pull Request 不發送，避免通知過多。
 
 請在 macOS Terminal 執行以下指令設定兩個 GitHub Actions Secrets（先登入 `gh auth login`）：
 

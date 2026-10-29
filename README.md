@@ -4,7 +4,7 @@
 
 **A free, colorful, safe and script-friendly FFmpeg video compressor for macOS and Windows.**
 
-- Written in Python 3.10+, installed with **uv** like `polytool` / `monitask-center`.
+- Written in Python 3.10+, installed with **uv**.
 - `vidpress` opens a colorful guided terminal menu; `vidpress compress ...` works in shell scripts and automation.
 - Powered by native FFmpeg/FFprobe subprocesses, not a Python video transcoder.
 
@@ -213,7 +213,7 @@ CI runs on macOS, Windows and Ubuntu; Ruff, Pytest, FFmpeg integration, build an
 
 ## CI and Telegram failure notifications
 
-Our GitHub Actions workflow follows the [aicp CI](https://github.com/weskao/aicp/blob/main/.github/workflows/ci.yml) approach. It checks macOS, Windows and Ubuntu using Python 3.10, Ruff, Pytest with FFmpeg integration, package builds and an installed CLI smoke test. A Telegram message is sent **only when a push run fails**, not for successful runs or PRs.
+Our GitHub Actions workflow checks macOS, Windows and Ubuntu using Python 3.10, Ruff, Pytest with FFmpeg integration, package builds and an installed CLI smoke test. A Telegram message is sent **only when a push run fails**, not for successful runs or PRs.
 
 Set two repository secrets from a Mac terminal (sign in with `gh auth login` first):
 
